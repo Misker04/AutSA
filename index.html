@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autism Social Aid</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Autism Social Aid</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="video">Upload Video:</label>
+                <input type="file" class="form-control" id="video" name="video" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var formData = new FormData();
+            formData.append("video", document.getElementById("video").files[0]);
+            fetch("/process_video", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerHTML = `
+                    <h4>Emotion: ${data.emotion}</h4>
+                    <p>Original Text: ${data.original_text}</p>
+                    <p>Simplified Text: ${data.simplified_text}</p>
+                    <h5>Suggested Replies:</h5>
+                    <ul>${data.responses.map(res => `<li>${res}</li>`).join('')}</ul>
+                    <audio controls><source src="${data.audio_output}" type="audio/mpeg"></audio>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
